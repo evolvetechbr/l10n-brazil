@@ -76,7 +76,9 @@ class Document(models.Model):
         if not self.filtered(filter_processador_edoc_nfse):
             return super().make_pdf()
         pdf = self.env.ref("l10n_br_nfse.report_br_nfse_danfe")._render_qweb_pdf(
-            self.ids
+            # Added mising parameter
+            "l10n_br_nfse.report_br_nfse_danfe",
+            self.ids,
         )[0]
 
         if self.document_number:
@@ -110,6 +112,7 @@ class Document(models.Model):
             im_prestador=misc.punctuation_rm(
                 self.company_id.partner_id.l10n_br_im_code or ""
             ),
+            provedor_nfse=self.company_id.provedor_nfse,
         )
 
     def _document_export(self, pretty_print=True):
@@ -147,6 +150,7 @@ class Document(models.Model):
 
         valor_servicos = 0
         valor_deducoes = 0
+        valor_ipi = 0
         valor_pis = 0
         valor_pis_retido = 0
         valor_cofins = 0
@@ -175,6 +179,7 @@ class Document(models.Model):
             result_line.update(line._prepare_line_service())
             valor_servicos += result_line.get("valor_servicos")
             valor_deducoes += result_line.get("valor_deducoes")
+            valor_ipi += 0  # result_line.get("valor_ipi")
             valor_pis += result_line.get("valor_pis")
             valor_pis_retido += result_line.get("valor_pis_retido")
             valor_cofins += result_line.get("valor_cofins")
@@ -226,6 +231,7 @@ class Document(models.Model):
         result = {
             "valor_servicos": valor_servicos,
             "valor_deducoes": valor_deducoes,
+            "valor_ipi": valor_ipi,
             "valor_pis": valor_pis,
             "valor_pis_retido": valor_pis_retido,
             "valor_cofins": valor_cofins,
@@ -278,6 +284,11 @@ class Document(models.Model):
             "ibs_uf_valor": ibs_uf_valor if ibs_uf_valor else None,
             "ibs_mun_valor": 0.0,
             "cbs_valor": cbs_valor if cbs_valor else None,
+            "valor_final_cobrado": valor_servicos,  # rever cálculo
+            "finalidade_nfse": 0,  # NFS-e regular
+            "uso_consumo": 0,
+            # Indicação destinatário do serviço: 0-Tomador do serviço=destinatario
+            "indicador_destinatario": 0,
             "situacao_tributaria_pis": situacao_tributaria_pis,
             "situacao_tributaria_cofins": situacao_tributaria_cofins,
             "base_calculo_pis": round(base_calculo_pis, 2),

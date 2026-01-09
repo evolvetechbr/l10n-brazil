@@ -104,7 +104,7 @@ row {
              <div class="row bt bb br bl">
                 <div class="col-2">
                     <img
-                        t-att-src="'data:image/png;base64,%s' % to_text(doc.company_id.nfse_city_logo)"
+                        t-att-src="'data:image/png;base64,%s' % (doc.company_id.nfse_city_logo.decode('utf-8') if isinstance(doc.company_id.nfse_city_logo, bytes) else (doc.company_id.nfse_city_logo or ''))"
                         style="max-height:80px; margin-top:4px; margin-left:10px;"
                     />
                 </div>
@@ -187,7 +187,7 @@ row {
                 <div class="col-2">
                     <img
                         style="max-height: 150px; padding-left: 25px; padding-top: 25px; max-width: 125px;"
-                        t-att-src="'data:image/png;base64,%s' % to_text(doc.company_id.logo)"
+                        t-att-src="'data:image/png;base64,%s' % (doc.company_id.logo.decode('utf-8') if isinstance(doc.company_id.nfse_city_logo, bytes) else (doc.company_id.nfse_city_logo or ''))"
                     /><br />
                 </div>
                 <div class="col-10">
@@ -444,7 +444,7 @@ row {
                     Valor dos Serviços R$
                 </div>
                 <div class="col-2 linha centro br">
-                    <span t-field="doc.amount_untaxed" />
+                    <span t-field="doc.amount_financial_total_gross" />
                 </div>
                 <div class="col-2 rotulo br">
                     Natureza Operação
