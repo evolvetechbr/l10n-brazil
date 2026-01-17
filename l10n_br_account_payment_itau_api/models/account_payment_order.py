@@ -18,10 +18,7 @@ class AccountPaymentOrder(models.Model):
 
     _inherit = "account.payment.order"
 
-    cnab_processor = fields.Selection(
-        selection=lambda self: self.env["l10n_br_cnab.config"]
-        ._fields["cnab_processor"]
-        .selection,
+    cnab_processor = fields.Char(
         compute="_compute_cnab_processor",
         readonly=True,
         string="CNAB Processor",
