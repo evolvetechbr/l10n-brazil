@@ -1,0 +1,5 @@
+# Módulo: l10n_br_account_payment_itau_api
+
+## Documentação API Itaú
+Collection do Postman: /home/mtolent/doodba-16/itau_api/itau_collection.json
+- Utilizar collection para gerar os endpoints e métodos da API.

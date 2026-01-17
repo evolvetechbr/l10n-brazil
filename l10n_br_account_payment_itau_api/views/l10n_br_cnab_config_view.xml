@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Copyright 2026
+    License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+-->
+<odoo>
+    <record id="l10n_br_account_payment_itau_api_cnab_config_form" model="ir.ui.view">
+        <field name="name">l10n_br_cnab.config.form.itau.api</field>
+        <field name="model">l10n_br_cnab.config</field>
+        <field
+            name="inherit_id"
+            ref="l10n_br_account_payment_order.l10n_br_cnab_config_form_view"
+        />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='payment_method_id']" position="attributes">
+                <attribute
+                    name="domain"
+                >[('code','in',('240', '400', '500', 'itau_api'))]</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

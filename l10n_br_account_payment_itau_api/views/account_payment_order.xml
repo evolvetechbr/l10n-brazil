@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Copyright 2026
+    License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+-->
+<odoo>
+    <record id="l10n_br_account_payment_itau_api_payment_order_form" model="ir.ui.view">
+        <field name="name">l10n_br_account_payment_itau_api.payment.order.form</field>
+        <field name="model">account.payment.order</field>
+        <field
+            name="inherit_id"
+            ref="account_payment_order.account_payment_order_form"
+        />
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <field name="cnab_processor" invisible="1" />
+                <button
+                    name="action_emitir_boleto_itau"
+                    type="object"
+                    string="Emitir Boleto Itaú"
+                    class="btn-primary"
+                    attrs="{'invisible': ['|', ('state', '!=', 'open'), ('cnab_processor', '!=', 'itau_api')]}"
+                />
+            </xpath>
+        </field>
+    </record>
+</odoo>
