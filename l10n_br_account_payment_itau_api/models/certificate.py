@@ -11,4 +11,5 @@ class Certificate(models.Model):
 
     type = fields.Selection(
         selection_add=[("itau_api", "API Itaú")],
+        ondelete={"itau_api": "set default"},
     )
