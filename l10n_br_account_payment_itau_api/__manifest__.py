@@ -16,6 +16,7 @@
     "data": [
         "security/ir.model.access.csv",
         "data/l10n_br_payment_method_itau_api.xml",
+        "data/cnab_codes/banco_itau_api_boleto_instructon.xml",
         "data/cnab_codes/banco_itau_api_boleto_fee_code.xml",
         "data/cnab_codes/banco_itau_api_boleto_protest_code.xml",
         "views/account_journal.xml",
