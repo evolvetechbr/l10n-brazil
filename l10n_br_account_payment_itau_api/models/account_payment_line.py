@@ -29,3 +29,13 @@ class AccountPaymentLine(models.Model):
         copy=False,
         readonly=True,
     )
+    itau_api_request = fields.Text(
+        string="Itaú API Request",
+        copy=False,
+        readonly=True,
+    )
+    itau_api_response = fields.Text(
+        string="Itaú API Response",
+        copy=False,
+        readonly=True,
+    )

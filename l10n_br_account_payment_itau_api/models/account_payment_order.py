@@ -1,6 +1,7 @@
 # Copyright 2026
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+import json
 import logging
 
 from erpbrasil.base import misc
@@ -84,11 +85,18 @@ class AccountPaymentOrder(models.Model):
                     line, move, partner, cnab_config
                 )
                 response_data = client.emitir_boleto(payload)
+                response_payload = response_data.get("response_data", {})
 
                 line.write(
                     {
                         "itau_nosso_numero": response_data.get("nosso_numero"),
                         "itau_boleto_status": response_data.get("status") or "emitido",
+                        "itau_api_request": json.dumps(
+                            payload, ensure_ascii=True, indent=2
+                        ),
+                        "itau_api_response": json.dumps(
+                            response_payload, ensure_ascii=True, indent=2
+                        ),
                     }
                 )
                 self.message_post(

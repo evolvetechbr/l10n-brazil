@@ -2,9 +2,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import base64
-import json
 import logging
-import os
 import uuid
 from tempfile import NamedTemporaryFile
 
@@ -113,6 +111,8 @@ class ItauAPIClient:
         }
         if self.client_id:
             headers["x-itau-apikey"] = self.client_id
+        if self.client_secret:
+            headers["Authorization"] = f"Bearer {self.client_secret}"
 
         try:
             response = requests.post(
@@ -133,16 +133,11 @@ class ItauAPIClient:
             _logger.exception("Invalid JSON response from Itaú API.")
             raise RuntimeError("Invalid JSON response from Itaú API.") from exc
 
-        os.makedirs("/opt/odoo/data", exist_ok=True)
-        response_path = "/opt/odoo/data/response.json"
-        with open(response_path, "w", encoding="utf-8") as response_file:
-            json.dump(response_data, response_file, ensure_ascii=True, indent=2)
-        _logger.info("Saved Itaú API response to %s.", response_path)
-
         return {
             "nosso_numero": response_data.get("nosso_numero")
             or response_data.get("nossoNumero"),
             "url_boleto": response_data.get("url_boleto")
             or response_data.get("urlBoleto")
             or response_data.get("linkBoleto"),
+            "response_data": response_data,
         }
