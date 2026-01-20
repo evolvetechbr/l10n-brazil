@@ -16,7 +16,10 @@
                 expr="//notebook[@name='l10n_br_account_payment_order']"
                 position="inside"
             >
-                <page string="Itaú API">
+                <page
+                    string="Itaú API"
+                    attrs="{'invisible': [('cnab_processor', '!=', 'itau_api')]}"
+                >
                     <group>
                         <field name="itau_certificate_id" />
                         <field name="itau_api_url" />

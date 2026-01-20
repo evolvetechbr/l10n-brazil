@@ -16,6 +16,7 @@ class L10nBRCNABConfig(models.Model):
     itau_certificate_id = fields.Many2one(
         comodel_name="l10n_br_fiscal.certificate",
         string="Certificado Itaú",
+        domain=[("type", "=", "itau_api")],
     )
     itau_api_url = fields.Char(
         string="Itaú API URL",
