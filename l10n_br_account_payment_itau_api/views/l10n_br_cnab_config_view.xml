@@ -26,6 +26,12 @@
                         <field name="itau_client_id" />
                         <field name="itau_client_secret" password="True" />
                     </group>
+                    <group>
+                        <field name="itau_partial_payment" />
+                        <field name="itau_partial_payment_max" />
+                        <field name="itau_recebimento_divergente_code" />
+                        <field name="itau_desconto_expresso" />
+                    </group>
                 </page>
             </xpath>
             <xpath expr="//field[@name='payment_method_id']" position="attributes">

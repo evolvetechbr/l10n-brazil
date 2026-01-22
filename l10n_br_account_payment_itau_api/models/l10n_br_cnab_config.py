@@ -28,6 +28,23 @@ class L10nBRCNABConfig(models.Model):
     itau_client_secret = fields.Char(
         string="Itaú Client Secret",
     )
+    itau_partial_payment = fields.Boolean(
+        string="Permitir pagamento parcial",
+        default=False,
+    )
+    itau_partial_payment_max = fields.Integer(
+        string="Quantidade máxima de pagamentos parciais",
+        default=0,
+    )
+    itau_recebimento_divergente_code = fields.Char(
+        string="Código de recebimento divergente",
+        default="03",
+        size=2,
+    )
+    itau_desconto_expresso = fields.Boolean(
+        string="Desconto expresso",
+        default=False,
+    )
 
     @api.model
     def _selection_cnab_processor(self):

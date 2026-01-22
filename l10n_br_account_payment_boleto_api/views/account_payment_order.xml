@@ -15,9 +15,9 @@
             <xpath expr="//header" position="inside">
                 <field name="cnab_processor" invisible="1" />
                 <button
-                    name="action_emitir_boleto_itau"
+                    name="action_registrar_boleto"
                     type="object"
-                    string="Emitir Boleto Itaú"
+                    string="Registrar boleto"
                     class="btn-primary"
                     attrs="{'invisible': ['|', ('state', '!=', 'open'), ('cnab_processor', '!=', 'itau_api')]}"
                 />

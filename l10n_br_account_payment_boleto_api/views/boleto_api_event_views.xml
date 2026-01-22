@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Copyright 2026
+    License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+-->
+<odoo>
+    <record id="boleto_api_event_tree" model="ir.ui.view">
+        <field name="name">l10n_br_account_payment_boleto_api.event.tree</field>
+        <field name="model">l10n_br_account_payment_boleto_api.event</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="create_date" />
+                <field name="payment_line_id" />
+                <field name="event_type" />
+                <field name="file_request_id" />
+                <field name="file_response_id" />
+                <field name="response_message" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="boleto_api_event_form" model="ir.ui.view">
+        <field name="name">l10n_br_account_payment_boleto_api.event.form</field>
+        <field name="model">l10n_br_account_payment_boleto_api.event</field>
+        <field name="arch" type="xml">
+            <form string="Boleto API Event">
+                <sheet>
+                    <group>
+                        <field name="payment_line_id" />
+                        <field name="event_type" />
+                        <field name="response_message" />
+                    </group>
+                    <notebook>
+                        <page string="Request">
+                            <group>
+                                <field name="file_request_id" />
+                            </group>
+                            <field
+                                name="request_json_content"
+                                widget="text"
+                                nolabel="1"
+                            />
+                        </page>
+                        <page string="Response">
+                            <group>
+                                <field name="file_response_id" />
+                            </group>
+                            <field
+                                name="response_json_content"
+                                widget="text"
+                                nolabel="1"
+                            />
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

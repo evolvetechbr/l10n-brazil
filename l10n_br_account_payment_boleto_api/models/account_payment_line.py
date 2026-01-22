@@ -19,23 +19,19 @@ class AccountPaymentLine(models.Model):
         string="Situação do Pagamento",
         readonly=True,
     )
-    itau_nosso_numero = fields.Char(
-        string="Nosso Número Itaú",
+    nosso_numero = fields.Char(
+        string="Nosso Número",
         copy=False,
         readonly=True,
     )
-    itau_boleto_status = fields.Char(
-        string="Status Boleto Itaú",
+    boleto_status = fields.Char(
+        string="Status Boleto",
         copy=False,
         readonly=True,
     )
-    itau_api_request = fields.Text(
-        string="Itaú API Request",
-        copy=False,
-        readonly=True,
-    )
-    itau_api_response = fields.Text(
-        string="Itaú API Response",
-        copy=False,
+    boleto_api_event_ids = fields.One2many(
+        comodel_name="l10n_br_account_payment_boleto_api.event",
+        inverse_name="payment_line_id",
+        string="Boleto API Events",
         readonly=True,
     )
