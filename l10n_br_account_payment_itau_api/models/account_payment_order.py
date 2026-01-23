@@ -46,8 +46,8 @@ class AccountPaymentOrder(models.Model):
         """Persist Itaú response data on payment line."""
         line.write(
             {
-                "itau_nosso_numero": response_data.get("nosso_numero"),
-                "itau_boleto_status": response_data.get("status") or "emitido",
+                "nosso_numero": response_data.get("nosso_numero"),
+                "boleto_status": response_data.get("status") or "emitido",
             }
         )
 

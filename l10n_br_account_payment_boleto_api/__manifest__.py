@@ -22,6 +22,5 @@
         "views/ir_attachment_views.xml",
         "views/account_payment_order.xml",
         "views/boleto_api_event_views.xml",
-        "views/res_config_settings_views.xml",
     ],
 }

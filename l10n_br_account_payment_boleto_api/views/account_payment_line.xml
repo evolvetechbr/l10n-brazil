@@ -4,8 +4,11 @@
     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 -->
 <odoo>
-    <record id="l10n_br_account_payment_itau_api_payment_line_tree" model="ir.ui.view">
-        <field name="name">account.payment.line.tree.itau.api</field>
+    <record
+        id="l10n_br_account_payment_boleto_api_payment_line_tree"
+        model="ir.ui.view"
+    >
+        <field name="name">account.payment.line.tree.boleto.api</field>
         <field name="model">account.payment.line</field>
         <field
             name="inherit_id"
@@ -19,19 +22,23 @@
         </field>
     </record>
 
-    <record id="l10n_br_account_payment_itau_api_payment_line_form" model="ir.ui.view">
-        <field name="name">account.payment.line.form.itau.api</field>
+    <record
+        id="l10n_br_account_payment_boleto_api_payment_line_form"
+        model="ir.ui.view"
+    >
+        <field name="name">account.payment.line.form.boleto.api</field>
         <field name="model">account.payment.line</field>
         <field
             name="inherit_id"
             ref="account_payment_order.account_payment_line_form"
         />
         <field name="arch" type="xml">
-            <xpath expr="//group[@name='right']" position="after">
-                <group string="Boleto API Events">
+            <xpath expr="//field[@name='payment_ids']/.." position="after">
+                <group string="Boleto API Events" col="12">
                     <field
                         name="boleto_api_event_ids"
                         nolabel="1"
+                        colspan="12"
                         context="{'default_payment_line_id': id}"
                     >
                         <tree editable="false">

@@ -4,8 +4,11 @@
     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 -->
 <odoo>
-    <record id="l10n_br_account_payment_itau_api_payment_mode_form" model="ir.ui.view">
-        <field name="name">account.payment.mode.form.itau.api</field>
+    <record
+        id="l10n_br_account_payment_boleto_api_payment_mode_form"
+        model="ir.ui.view"
+    >
+        <field name="name">account.payment.mode.form.boleto.api</field>
         <field name="model">account.payment.mode</field>
         <field
             name="inherit_id"

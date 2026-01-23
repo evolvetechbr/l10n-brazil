@@ -4,8 +4,11 @@
     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 -->
 <odoo>
-    <record id="l10n_br_account_payment_itau_api_ir_attachment_form" model="ir.ui.view">
-        <field name="name">ir.attachment.form.itau.api.json</field>
+    <record
+        id="l10n_br_account_payment_boleto_api_ir_attachment_form"
+        model="ir.ui.view"
+    >
+        <field name="name">ir.attachment.form.boleto.api.json</field>
         <field name="model">ir.attachment</field>
         <field name="inherit_id" ref="base.view_attachment_form" />
         <field name="arch" type="xml">
