@@ -18,13 +18,9 @@ class AccountPaymentOrder(models.Model):
 
     _inherit = "account.payment.order"
 
-    def action_emitir_boleto_itau(self):
-        """Emit Itaú boletos using the generic boleto API flow."""
-        return self.action_emitir_boleto_api()
-
     def action_registrar_boleto(self):
         """Register boleto using the Itaú API implementation."""
-        return self.action_emitir_boleto_itau()
+        return super().action_registrar_boleto()
 
     def _validate_boleto_api_order(self, cnab_config):
         """Validate Itaú API settings before emission."""
@@ -44,10 +40,14 @@ class AccountPaymentOrder(models.Model):
 
     def _handle_boleto_response(self, line, response_data):
         """Persist Itaú response data on payment line."""
+        cnab_state = "accepted" if response_data.success else "not_accepted"
+        if line.move_line_id:
+            line.move_line_id.cnab_state = cnab_state
+            if response_data.success:
+                line.move_line_id.payment_situation = "aberta"
         line.write(
             {
-                "nosso_numero": response_data.get("nosso_numero"),
-                "boleto_status": response_data.get("status") or "emitido",
+                "boleto_status": "emitido" if response_data.success else "erro",
             }
         )
 
@@ -56,14 +56,18 @@ class AccountPaymentOrder(models.Model):
         self.message_post(
             body=_(
                 "Boleto Itaú emitted for %(partner)s. "
-                "Nosso número: %(nosso)s. URL: %(url)s"
+                "Return code: %(code)s. Message: %(msg)s"
             )
             % {
                 "partner": partner.display_name,
-                "nosso": response_data.get("nosso_numero") or "-",
-                "url": response_data.get("url_boleto") or "-",
+                "code": response_data.return_code or "-",
+                "msg": response_data.return_msg or "-",
             }
         )
+
+    def action_consultar_boleto(self):
+        """Consult Itaú boletos using the generic boleto API flow."""
+        return super().action_consultar_boleto()
 
     def _prepare_itau_boleto_payload(self, line, move, partner, cnab_config):
         """Prepare Itaú boleto payload from payment line data."""
@@ -186,6 +190,59 @@ class AccountPaymentOrder(models.Model):
             }
 
         return payload
+
+    def _prepare_boleto_query_params(self, line, cnab_config):
+        """Prepare Itaú API query parameters for boleto consultation."""
+        _logger.info(
+            "Preparing Itaú boleto consultation parameters for %s.",
+            line.display_name,
+        )
+        nosso_numero = line.nosso_numero or line.own_number
+        if not nosso_numero:
+            raise UserError(_("Payment line %s has no nosso número.") % line.name)
+        id_beneficiario = (
+            cnab_config.cnab_company_bank_code
+            or cnab_config.convention_code
+            or self.company_id.partner_id.cnpj_cpf
+        )
+        if not id_beneficiario:
+            raise UserError(_("CNAB beneficiary id is not configured."))
+        return {
+            "id_beneficiario": id_beneficiario,
+            "nosso_numero": self._format_our_number(nosso_numero),
+        }
+
+    def _handle_boleto_consulta_response(self, line, response_data):
+        """Persist Itaú consultation response on the payment line."""
+        status = response_data.get("status") or response_data.get("situacao")
+        nosso_numero = response_data.get("nosso_numero") or response_data.get(
+            "nossoNumero"
+        )
+        values = {}
+        if status:
+            values["itau_boleto_status"] = status
+        if nosso_numero:
+            values["nosso_numero"] = nosso_numero
+        if values:
+            line.write(values)
+
+    def _post_boleto_consulta_message(self, line, response_data):
+        """Post a chatter message after Itaú boleto consultation."""
+        self.message_post(
+            body=_(
+                "Boleto Itaú consulted for %(line)s. "
+                "Status: %(status)s. Nosso número: %(nosso)s."
+            )
+            % {
+                "line": line.display_name,
+                "status": response_data.get("status")
+                or response_data.get("situacao")
+                or "-",
+                "nosso": response_data.get("nosso_numero")
+                or response_data.get("nossoNumero")
+                or "-",
+            }
+        )
 
     def _get_person_type_payload(self, partner):
         """Build the person type payload for Itaú API."""

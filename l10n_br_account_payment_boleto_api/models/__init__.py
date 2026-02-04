@@ -6,3 +6,4 @@ from . import account_payment_line
 from . import account_payment_order
 from . import ir_attachment
 from . import boleto_api_event
+from . import boleto_api_return

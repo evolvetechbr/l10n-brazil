@@ -24,6 +24,13 @@
                     class="btn-primary"
                     attrs="{'invisible': ['|', ('state', '!=', 'open'), ('cnab_processor', '!=', 'itau_api')]}"
                 />
+                <button
+                    name="action_consultar_boleto"
+                    type="object"
+                    string="Consultar boleto"
+                    class="btn-secondary"
+                    attrs="{'invisible': ['|', ('state', '!=', 'open'), ('cnab_processor', '!=', 'itau_api')]}"
+                />
             </xpath>
         </field>
     </record>

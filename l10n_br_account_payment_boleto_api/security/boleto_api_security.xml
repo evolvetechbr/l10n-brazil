@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Copyright 2026
+    License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+-->
+<odoo>
+    <record id="group_boleto_api_user" model="res.groups">
+        <field name="name">Boleto API User</field>
+        <field name="category_id" ref="base.module_category_accounting" />
+    </record>
+</odoo>

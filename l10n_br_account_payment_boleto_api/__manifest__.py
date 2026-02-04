@@ -14,6 +14,7 @@
         "l10n_br_fiscal_certificate",
     ],
     "data": [
+        "security/boleto_api_security.xml",
         "security/ir.model.access.csv",
         "views/account_journal.xml",
         "views/account_move_view.xml",

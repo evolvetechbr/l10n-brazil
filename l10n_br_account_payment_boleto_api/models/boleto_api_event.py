@@ -24,7 +24,10 @@ class BoletoAPIEvent(models.Model):
         index=True,
     )
     event_type = fields.Selection(
-        selection=[("emitir_boleto", "Emitir Boleto")],
+        selection=[
+            ("emitir_boleto", "Emitir Boleto"),
+            ("consultar_boleto", "Consultar Boleto"),
+        ],
         required=True,
         default="emitir_boleto",
     )
@@ -54,13 +57,24 @@ class BoletoAPIEvent(models.Model):
         readonly=True,
     )
 
-    def create_event_save_json(self, payment_line, request_payload, response_payload):
+    def create_event_save_json(
+        self,
+        payment_line,
+        request_payload,
+        response_payload,
+        event_type="emitir_boleto",
+    ):
         """Create event and attach request/response payloads as JSON files."""
         _logger.info(
             "Creating boleto API event for payment line %s.",
             payment_line.name,
         )
-        event = self.create({"payment_line_id": payment_line.id})
+        event = self.create(
+            {
+                "payment_line_id": payment_line.id,
+                "event_type": event_type,
+            }
+        )
 
         request_name = f"boleto_api_request_{payment_line.id}.json"
         response_name = f"boleto_api_response_{payment_line.id}.json"

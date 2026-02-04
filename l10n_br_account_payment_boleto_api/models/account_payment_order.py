@@ -1,6 +1,7 @@
 # Copyright 2026
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+import json
 import logging
 
 from odoo import _, fields, models
@@ -26,8 +27,8 @@ class AccountPaymentOrder(models.Model):
                 order.payment_mode_id.cnab_config_id.cnab_processor or False
             )
 
-    def action_emitir_boleto_api(self):
-        """Emit boletos for payment lines via a boleto API implementation.
+    def action_registrar_boleto(self):
+        """Registra boletos for payment lines via a boleto API implementation.
 
         Raises:
             UserError: When validation fails or the API request errors.
@@ -42,7 +43,11 @@ class AccountPaymentOrder(models.Model):
             raise UserError(_("There are no payment lines to process."))
 
         self._validate_boleto_api_order(cnab_config)
-        client = self._get_boleto_api_client(cnab_config)
+        client = self._get_boleto_api_client(  # pylint: disable=assignment-from-none
+            cnab_config
+        )
+        if not client:
+            raise UserError(_("No boleto API client configured for this processor."))
 
         for line in self.payment_line_ids:
             try:
@@ -73,9 +78,18 @@ class AccountPaymentOrder(models.Model):
                         % {"invoice": move.display_name}
                     )
 
-                payload = self._prepare_boleto_payload(line, move, partner, cnab_config)
-                response_data = client.emitir_boleto(payload)
-                response_payload = response_data.get("response_data", {})
+                payload = self._prepare_boleto_payload(  # pylint: disable=assignment-from-none
+                    line,
+                    move,
+                    partner,
+                    cnab_config,
+                )
+                if not payload:
+                    raise UserError(
+                        _("No boleto payload builder configured for this processor.")
+                    )
+                api_return = client.emitir_boleto(payload)
+                response_payload = self._extract_response_payload(api_return)
                 self.env[
                     "l10n_br_account_payment_boleto_api.event"
                 ].create_event_save_json(
@@ -84,8 +98,8 @@ class AccountPaymentOrder(models.Model):
                     response_payload=response_payload,
                 )
 
-                self._handle_boleto_response(line, response_data)
-                self._post_boleto_message(partner, response_data)
+                self._handle_boleto_response(line, api_return)
+                self._post_boleto_message(partner, api_return)
             except UserError:
                 raise
             except Exception as exc:
@@ -97,9 +111,61 @@ class AccountPaymentOrder(models.Model):
 
         return True
 
-    def action_registrar_boleto(self):
-        """Register boleto using the configured boleto API implementation."""
-        return self.action_emitir_boleto_api()
+    def action_consultar_boleto(self):
+        """Consult boletos using the configured boleto API implementation.
+
+        Raises:
+            UserError: When validation fails or the API request errors.
+        """
+        _logger.info("Starting boleto API consultation for %s.", self.display_name)
+        self.ensure_one()
+
+        cnab_config = self.cnab_config_id
+        if not cnab_config:
+            raise UserError(_("Missing CNAB configuration on the payment order."))
+        if not self.payment_line_ids:
+            raise UserError(_("There are no payment lines to process."))
+
+        self._validate_boleto_api_order(cnab_config)
+        client = self._get_boleto_api_client(  # pylint: disable=assignment-from-none
+            cnab_config
+        )
+        if not client:
+            raise UserError(_("No boleto API client configured for this processor."))
+
+        for line in self.payment_line_ids:
+            try:
+                query_params = self._prepare_boleto_query_params(  # pylint: disable=assignment-from-none
+                    line,
+                    cnab_config,
+                )
+                if not query_params:
+                    raise UserError(
+                        _("No boleto consultation configured for this processor.")
+                    )
+                response_data = client.consultar_boleto(query_params)
+                response_payload = self._extract_response_payload(response_data)
+                self.env[
+                    "l10n_br_account_payment_boleto_api.event"
+                ].create_event_save_json(
+                    payment_line=line,
+                    request_payload=query_params,
+                    response_payload=response_payload,
+                    event_type="consultar_boleto",
+                )
+
+                self._handle_boleto_consulta_response(line, response_data)
+                self._post_boleto_consulta_message(line, response_data)
+            except UserError:
+                raise
+            except Exception as exc:
+                _logger.exception(
+                    "Error consulting boleto via API for payment line %s.",
+                    line.display_name,
+                )
+                raise UserError(_("Error consulting boleto via API: %s") % exc) from exc
+
+        return True
 
     def _validate_boleto_api_order(self, cnab_config):
         """Hook to validate boleto API settings before emission."""
@@ -107,11 +173,11 @@ class AccountPaymentOrder(models.Model):
 
     def _get_boleto_api_client(self, cnab_config):
         """Return the API client implementation for the boleto processor."""
-        raise UserError(_("No boleto API client configured for this processor."))
+        return None
 
     def _prepare_boleto_payload(self, line, move, partner, cnab_config):
         """Prepare the boleto payload for the configured API."""
-        raise UserError(_("No boleto payload builder configured for this processor."))
+        return None
 
     def _handle_boleto_response(self, line, response_data):
         """Hook to persist response data on the payment line."""
@@ -124,4 +190,34 @@ class AccountPaymentOrder(models.Model):
         _logger.info(
             "Posting boleto API emission message for %s.",
             partner.display_name,
+        )
+
+    def _extract_response_payload(self, response_data):
+        """Extract JSON payload from response data for event logging."""
+        if isinstance(response_data, dict):
+            return response_data.get("response_data", {}) or {}
+        raw = getattr(response_data, "return_msg_detail", None)
+        if not raw:
+            return {}
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return {}
+
+    def _prepare_boleto_query_params(self, line, cnab_config):
+        """Prepare query parameters for boleto consultation."""
+        return None
+
+    def _handle_boleto_consulta_response(self, line, response_data):
+        """Hook to persist consultation response data on the payment line."""
+        _logger.info(
+            "Boleto API consultation response received for payment line %s.",
+            line.display_name,
+        )
+
+    def _post_boleto_consulta_message(self, line, response_data):
+        """Hook to post a chatter message after successful consultation."""
+        _logger.info(
+            "Posting boleto API consultation message for %s.",
+            line.display_name,
         )
